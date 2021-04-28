@@ -104,6 +104,7 @@ const tourSchema = new mongoose.Schema(
     ],
     guides: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
   },
+  // set virtuals to be shown
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 // virtual property doesn't exists in database it's a property we create on the fly basically

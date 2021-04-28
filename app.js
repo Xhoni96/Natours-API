@@ -10,6 +10,7 @@ const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 
 const app = express();
 // 1) GLOBAL MIDDLEWARES
@@ -74,6 +75,7 @@ app.use((req, res, next) => {
 
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/reviews", reviewRoutes);
 /* the middleware function below gets called only if the specified url was not corect, so wasn't handled from the routes above. we use the .all because we want
 to handle every request that comes. And as the url we use '*' which means all the url that weren't handled before from the other handler functions. Noth this gets called
 becase remember, the midleware stack works in the order that you specify in the code. so since this is the last middleware function and it catches a url that wasn't 
