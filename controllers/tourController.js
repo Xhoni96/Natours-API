@@ -1,7 +1,6 @@
 const Tour = require("../models/tourModel");
-const APIFeatures = require("../utils/apiFeatures");
-const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
+const factory = require("./handlerFactory");
 
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = "5";
@@ -23,76 +22,11 @@ exports.aliasTopTours = (req, res, next) => {
 //   next();
 // };
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Tour, req.query).filter().sort().limitFields().paginate();
-  const tours = await features.query;
-
-  res.status(200).json({
-    status: "success",
-    results: tours.length,
-    data: {
-      tours,
-    },
-  });
-});
-
-exports.getTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id);
-
-  if (!tour) {
-    return next(new AppError("No tour found with that ID", 404));
-    // next nese therritet me parameter brenda express e quan automatikisht si error dhe therret our error handling global middlerare, te cilit i kalojme err tone
-  }
-  // Tour.findOne({_id: req.params.id}) same as 👆👆
-  res.status(200).json({
-    status: "success",
-    data: {
-      tour,
-    },
-  });
-});
-
-exports.createTour = catchAsync(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
-  res.status(201).json({
-    status: "success",
-    data: {
-      tour: newTour,
-    },
-  });
-
-  // Always need to send something back in order to complete the "request/response cycle"
-});
-
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true, // kjo ben qe validatoret te behen run perseri ketu, pa kete mongo i pranon updatet pa marre parasysh validatoret qe kemi vendos tek schema
-  });
-
-  if (!tour) {
-    return next(new AppError("No tour found with that ID", 404));
-    // next nese therritet me parameter brenda express e quan automatikisht si error dhe therret our error handling global middlerare, te cilit i kalojme err tone
-  }
-  res.status(201).json({
-    status: "success",
-    data: {
-      updatedTour: tour,
-    },
-  });
-});
-
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  // In Rest API it's common in delete requests to not send any body back to the client
-  const tour = await Tour.findByIdAndDelete(req.params.id);
-
-  if (!tour) {
-    return next(new AppError("No tour found with that ID", 404));
-    // next nese therritet me parameter brenda express e quan automatikisht si error dhe therret our error handling global middlerare, te cilit i kalojme err tone
-  }
-
-  res.status(204).end();
-});
+exports.getAllTours = factory.getAll(Tour);
+exports.getTour = factory.getOne(Tour, "reviews");
+exports.createTour = factory.createOne(Tour);
+exports.updateTour = factory.updateOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour);
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
   /* the aggregation pipeline is a bit like a regular query ,but in aggregations we can manipulate the data in couple of diffrent steps.

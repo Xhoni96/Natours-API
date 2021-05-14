@@ -107,9 +107,21 @@ const tourSchema = new mongoose.Schema(
   // set virtuals to be shown
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+tourSchema.index({ price: 1, ratingsAverage: -1 }); // 1 for ascending -1 for descending
+
 // virtual property doesn't exists in database it's a property we create on the fly basically
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
+});
+
+// this 👇 is a virtual populate. basically we needed the reviews on the tour but since we made parent referencing we don't have access. Easiest fix will be to
+// have child referencing on the tour but we don't want to do that since it can grow indefinitely. so virtual populate let's us do exactly that.child referencing but,
+//without persisting on the database
+tourSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour",
+  localField: "_id",
 });
 
 tourSchema.pre(/^find/, function (next) {

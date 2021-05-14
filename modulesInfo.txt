@@ -1,0 +1,9 @@
+vendos ne eslint 
+  "parserOptions": {
+      "sourceType": "module",
+      "allowImportExportEverywhere": true
+    },
+
+    vendos ne package.json   "type": "module"  ose mund te besh filet .js ne .mjs .. disa vende se njeh me require 
+    duhet te therrasesh api moule qe ka node qe te mund te besh require sepse se perdor dot me require pasi i thua type module
+    dhe tek modelet nuk i njeh import me destructuring direkt do ta besh psh User.findbyId. .etj..  po prp ka probleme duhet bere me require
