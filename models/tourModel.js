@@ -38,6 +38,7 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       min: [1, "Rating must be above 1.0"],
       max: [5, "Rating must be below 5.0"],
+      set: (val) => Math.round(val * 10),
     },
     ratingsQuantity: {
       type: Number,
@@ -109,6 +110,7 @@ const tourSchema = new mongoose.Schema(
 );
 
 tourSchema.index({ price: 1, ratingsAverage: -1 }); // 1 for ascending -1 for descending
+tourSchema.index({ startLocation: "2dsphere" });
 
 // virtual property doesn't exists in database it's a property we create on the fly basically
 tourSchema.virtual("durationWeeks").get(function () {

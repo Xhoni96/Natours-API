@@ -1,4 +1,5 @@
 const Tour = require("../models/tourModel");
+const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const factory = require("./handlerFactory");
 
@@ -112,5 +113,61 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     data: {
       plan,
     },
+  });
+});
+
+// tours-within/:distance/center/:latlng/unit/:unit
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  if (!latlng) return next(new AppError("Please provide latitude and longitude in the format: lat,lng", 400));
+
+  const [lat, lng] = latlng.split(",");
+  const radius = unit === "mi" ? distance / 3963.2 : distance / 6378.1;
+
+  // needs the index defined at the model for the field startLocation down below
+  const tours = await Tour.find({ startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } } });
+
+  res.status(200).json({
+    status: "success",
+    results: tours.length,
+    data: { data: tours },
+  });
+});
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  if (!latlng) return next(new AppError("Please provide latitude and longitude in the format: lat,lng", 400));
+
+  const multiplier = unit === "mi" ? 0.000621371 : 0.001;
+
+  const [lat, lng] = latlng.split(",");
+
+  const distances = await Tour.aggregate([
+    // geoNear is the only aggregation pipeline stage for geospatial aggregation and it always needs to be first
+    // also it requires at least one of our fields to have a geospatial index , but we have that defined already
+    // if you have multiple fields indexed with geospatial we have to use the key operator to define which field to use for calculation
+    {
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: [+lng, +lat],
+        },
+        distanceField: "distance",
+        distanceMultiplier: multiplier, // convert it to cilometers or miles
+      },
+    },
+    {
+      $project: {
+        // get only these fields
+        distance: 1,
+        name: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: "success",
+    results: distances.length,
+    data: { data: distances },
   });
 });

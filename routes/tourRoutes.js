@@ -23,6 +23,13 @@ router
     authController.allowDataOnlyTo("admin", "lead-guide", "guide"),
     tourController.getMonthlyPlan
   );
+
+// /tours-within?distance=233&center=-40,45&unit=mi     nese do perdornim query strings
+// /tours-within/233/center/-40,45/unit/mi    looks cleaner plus is a standard way of specifying URL
+router.route("/tours-within/:distance/center/:latlng/unit/:unit").get(tourController.getToursWithin);
+
+router.route("/distances/:latlng/unit/:unit").get(tourController.getDistances);
+
 router
   .route("/")
   .get(/* authController.protectData, */ tourController.getAllTours)

@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
+const cookieParser = require("cookie-parser");
 
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
@@ -31,7 +32,7 @@ app.use("/api", limiter);
 // Middleware function needed to read data from body since express doesn't supports it out of the box. exp req.body
 // qendron ne mes te req dhe response.
 app.use(express.json({ limit: "10kb" })); // limiting the body amount of request
-
+app.use(cookieParser());
 // After express.json is a good place to sanitaze data since here expres.json reads the data from the body
 
 // Data sanitization against NoSQL query injection.
@@ -55,6 +56,7 @@ app.use(
 app.use((req, res, next) => {
   // krijojme propertyn tone ne middleware per te pare kohen e req, ne rast se psh do duhet tia dergojme klientit
   req.requestTime = new Date().toISOString();
+  console.log(req.cookies);
   next();
 });
 // We load the file that we sent to client in the top level code so we don't block the event loop, because top level code is the code

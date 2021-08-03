@@ -71,7 +71,8 @@ exports.getAll = (Model) =>
       .sort()
       .limitFields()
       .paginate(); /* .populate("tour user"); */ // another way to populate 2 doc at the same time
-    const doc = await features.query.explain();
+    // const doc = await features.query.explain();
+    const doc = await features.query;
 
     res.status(200).json({
       status: "success",

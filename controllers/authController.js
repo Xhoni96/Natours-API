@@ -16,7 +16,7 @@ const createSendToken = (user, statusCode, res) => {
   const cookieOptions = {
     expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
     // secure: true, // only in https
-    httpOnly: true, // cant be accessed by the browser
+    httpOnly: true, // cant be accessed by the browser, modified or even deleted
   };
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
   res.cookie("jwt", token, cookieOptions);
@@ -63,8 +63,11 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.protectData = catchAsync(async (req, res, next) => {
   // 1) Get token and check if it's there
   let token;
+  // auth header is only for api testing
   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
